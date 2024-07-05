@@ -15,11 +15,13 @@ namespace Teleport
         public string Author => "Seka";
 
         public Monster? _selectedMonsterT = null;
-        private void OnQuestLeave(int questId) { _selectedMonsterT = null; }
-        private void OnQuestComplete(int questId) { _selectedMonsterT = null; }
-        private void OnQuestFail(int questId) { _selectedMonsterT = null; }
-        private void OnQuestReturn(int questId) { _selectedMonsterT = null; }
-        private void OnQuestAbandon(int questId) { _selectedMonsterT = null; }
+        public void OnMonsterDestroy(Monster monster) {
+            if (monster == _selectedMonsterT) { _selectedMonsterT = null; }
+        }
+        public void OnMonsterDeath(Monster monster) {
+            if (monster == _selectedMonsterT) { _selectedMonsterT = null; }
+        }
+
 
         private Vector3 _currentPosition;
         private Vector3 _lastPosition;
@@ -32,7 +34,6 @@ namespace Teleport
         private Vector3 _inputPosition = new Vector3(0f, 0f, 0f);
         private float _minInputPos = -5000000.000f;
         private float _maxInputPos = 5000000.000f;
-        private bool _monsterSelectOn = true;
 
         public static float Clamp(float value, float min, float max)
         {
@@ -55,22 +56,24 @@ namespace Teleport
             ImGui.InputFloat("Velocity", ref _movementAmount, 0.0f, 300.0f);
             _movementAmount = Clamp(_movementAmount, _minMovementAmount, _maxMovementAmount);
 
-            if (ImGui.BeginCombo("Select", (_selectedMonsterT is not null ? $"{_selectedMonsterT.Type} @ 0x{_selectedMonsterT.Instance:X}" : "None"))) // Instance shows address of pointer
+            var monsters = Monster.GetAllMonsters().TakeLast(5).ToArray();
+            if (monsters == null)
+                return;
+
+            if (ImGui.BeginCombo("Select", $"{_selectedMonsterT}"))
             {
-                var monsters = Monster.GetAllMonsters().TakeLast(5).ToArray();
                 foreach (var monster in monsters)
                 {
-                    if (ImGui.Selectable($"{monster.Type} @ 0x{monster.Instance:X}", _selectedMonsterT == monster))
+                    if (ImGui.Selectable($"{monster}", _selectedMonsterT == monster))
                     {
                         _selectedMonsterT = monster;
-                        _monsterSelectOn = true;
                     }
                 }
                 ImGui.EndCombo();
             }
-            if (ImGui.Button("Monster Here"))
+            if (ImGui.Button("Mon-to-You"))
             {
-                if (_selectedMonsterT == null || !_monsterSelectOn)
+                if (_selectedMonsterT == null)
                     return;
                 _selectedMonsterT.Teleport(player.Position);
                 _mLastPosition = _selectedMonsterT.Position;
@@ -79,13 +82,20 @@ namespace Teleport
                 else
                 { _mLockPosition = false; }
             }
+            if (ImGui.Button("You-to-Mon"))
+            {
+                if (_selectedMonsterT == null)
+                    return;
+                player.Teleport(_selectedMonsterT.Position);
+                _lastPosition = player.Position;
+            }
 
             ImGui.InputFloat3("", ref _inputPosition);
             _inputPosition.X = Clamp(_inputPosition.X, _minInputPos, _maxInputPos);
             _inputPosition.Y = Clamp(_inputPosition.Y, _minInputPos, _maxInputPos);
             _inputPosition.Z = Clamp(_inputPosition.Z, _minInputPos, _maxInputPos);
 
-            if (ImGui.Button("Player To"))
+            if (ImGui.Button("ToCoord"))
             {
                 if (!_lockPosition)
                 { _lockPosition = true; player.PauseAnimations(); }
@@ -151,15 +161,7 @@ namespace Teleport
             if (_selectedMonsterT == null)
                 return;
 
-            if(_selectedMonsterT.Health == 0)
-            {
-                _monsterSelectOn = false;
-            }
-
-            if (_mLockPosition && _selectedMonsterT != null && _monsterSelectOn)
-            {
-                _selectedMonsterT.Teleport(_mLastPosition);
-            }
+            if (_mLockPosition && _selectedMonsterT != null)  { _selectedMonsterT.Teleport(_mLastPosition); }
 
         }
     }
