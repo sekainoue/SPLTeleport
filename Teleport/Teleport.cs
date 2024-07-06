@@ -130,14 +130,26 @@ namespace Teleport
                 }
                 if (Input.IsDown(Key.LeftAlt) && Input.IsDown(Key.PageUp))
                 {
+                    
+                    if (_movementAmount <= 30.0f)
+                    {
+                        _currentPosition.Y += 30f;
+                        player.Teleport(_currentPosition);
+                    }
                     _currentPosition.Y += _movementAmount;
-                    player.Teleport(_currentPosition); 
+                    player.Teleport(_currentPosition);
                     _lastPosition = _currentPosition; 
                 }
                 if (Input.IsDown(Key.LeftAlt) && Input.IsDown(Key.PageDown))
                 {
-                    _currentPosition.Y -= _movementAmount;
-                    player.Teleport(_currentPosition); 
+                    
+                    if (_movementAmount <= 30.0f) {
+                        _currentPosition.Y -= _movementAmount/20;
+                        player.Teleport(_currentPosition);
+                    } else {
+                        _currentPosition.Y -= _movementAmount;
+                        player.Teleport(_currentPosition);
+                    }
                     _lastPosition = _currentPosition; 
                 }
                 if (Input.IsDown(Key.LeftAlt) && Input.IsDown(Key.LeftArrow))
