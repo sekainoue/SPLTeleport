@@ -29,6 +29,7 @@ namespace Teleport
         private Vector3 _inputPosition = new Vector3(0f, 0f, 0f);
         private float _minInputPos = -5000000.000f;
         private float _maxInputPos = 5000000.000f;
+        private bool _cMode = false;
         public static float Clamp(float value, float min, float max)  {
             if (value < min) return min;
             if (value > max) return max;
@@ -58,32 +59,32 @@ namespace Teleport
             _inputPosition.X = Clamp(_inputPosition.X, _minInputPos, _maxInputPos);
             _inputPosition.Y = Clamp(_inputPosition.Y, _minInputPos, _maxInputPos);
             _inputPosition.Z = Clamp(_inputPosition.Z, _minInputPos, _maxInputPos);
-            var aC = player?.ActionController; if (aC == null) return;
+            var aC = player?.ActionController; if (aC == null) return; if (player == null) return;
             uint stageID = (uint)Area.CurrentStage;
             if (ImGui.Button("ToCoord")) {
-                if ((stageID >= 100 && stageID <= 109) || (stageID >= 200 && stageID <= 202) || (stageID >= 403 && stageID <= 417) || stageID == 504) {
-                    if (!_lockPosition) { _lockPosition = true; var seiz = new ActionInfo(1, 195); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz));
-                    } else  { _lockPosition = false; var seiz = new ActionInfo(1, 0);  _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); }
-                } else if ((stageID >= 301 && stageID <= 306) || (stageID >= 501 && stageID <= 506)) {
-                    if (!_lockPosition) { _lockPosition = true; var seiz = new ActionInfo(1, 149); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz));
-                    } else {  _lockPosition = false; var seiz = new ActionInfo(1, 0); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); } } } }
+                if ((stageID >= 100 && stageID <= 109) || (stageID >= 200 && stageID <= 202) || (stageID >= 403 && stageID <= 417) || stageID == 504) { _cMode = true;
+                    if (!_lockPosition) { _lockPosition = true; player.PauseAnimations();
+                    } else  { _lockPosition = false; var seiz = new ActionInfo(1, 0);  _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); player.ResumeAnimations(); }
+                } else if ((stageID >= 301 && stageID <= 306) || (stageID >= 501 && stageID <= 506)) {_cMode = false;
+                    if (!_lockPosition) { _lockPosition = true; var seiz = new ActionInfo(1, 149); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); player.PauseAnimations();
+                    } else {  _lockPosition = false; var seiz = new ActionInfo(1, 0); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); player.ResumeAnimations(); } } } }
         public void OnLoad() { KeyBindings.AddKeybind("TeleLock", new Keybind<Key>(Key.T, [Key.LeftShift, Key.LeftAlt])); }
         public unsafe void OnUpdate(float deltaTime)  {
             var player = Player.MainPlayer; if (player is null) return;
             var aC = player?.ActionController; if (aC == null) return;
-            uint stageID = (uint)Area.CurrentStage;
-            if ((stageID >= 100 && stageID <= 109) || (stageID >= 200 && stageID <= 202) || (stageID >= 403 && stageID <= 417) || stageID == 504)  {
+            uint stageID = (uint)Area.CurrentStage; if (player == null) return;
+            if ((stageID >= 100 && stageID <= 109) || (stageID >= 200 && stageID <= 202) || (stageID >= 403 && stageID <= 417) || stageID == 504)  { _cMode = true;
                 if (KeyBindings.IsPressed("TeleLock")) { 
-                    if (!_lockPosition) { _lockPosition = true; var seiz = new ActionInfo(1, 195); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); }
-                    else { _lockPosition = false; var seiz = new ActionInfo(1, 0); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); }}
-            } else if ((stageID >= 301 && stageID <= 306) || (stageID >= 501 && stageID <= 506))  { 
+                    if (!_lockPosition) { _lockPosition = true; player.PauseAnimations();
+                    } else { _lockPosition = false; var seiz = new ActionInfo(1, 0); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); player.ResumeAnimations();}}
+            } else if ((stageID >= 301 && stageID <= 306) || (stageID >= 501 && stageID <= 506))  { _cMode = false;
                 if (KeyBindings.IsPressed("TeleLock")) {
-                    if (!_lockPosition)  {  _lockPosition = true; var seiz = new ActionInfo(1, 149); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); }
-                    else { _lockPosition = false; var seiz = new ActionInfo(1, 0); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); }}}
+                    if (!_lockPosition)  {  _lockPosition = true; var seiz = new ActionInfo(1, 149); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); player.PauseAnimations(); 
+                    } else { _lockPosition = false; var seiz = new ActionInfo(1, 0); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); player.ResumeAnimations(); }}}
             if (player == null) return;
             _currentPosition = player.Position;
             if (_lockPosition) {
-                player.Teleport(_lastPosition);
+                if (_cMode) { var seiz = new ActionInfo(1, 593); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); } player.Teleport(_lastPosition); 
                 if (Input.IsDown(Key.UpArrow)) { _currentPosition.Z -= _movementAmount; player.Teleport(_currentPosition); _lastPosition = _currentPosition; }
                 if (Input.IsDown(Key.DownArrow)) { _currentPosition.Z += _movementAmount; player.Teleport(_currentPosition); _lastPosition = _currentPosition; }
                 if (Input.IsDown(Key.PageUp)) { _currentPosition.Y += _movementAmount; player.Teleport(_currentPosition); _lastPosition = _currentPosition; }
