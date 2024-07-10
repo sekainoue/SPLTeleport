@@ -62,7 +62,7 @@ namespace Teleport
             uint stageID = (uint)Area.CurrentStage;
             if (ImGui.Button("ToCoord")) {
                 if ((stageID >= 100 && stageID <= 109) || (stageID >= 200 && stageID <= 202) || (stageID >= 403 && stageID <= 417) || stageID == 504) {
-                    if (!_lockPosition) { _lockPosition = true; var seiz = new ActionInfo(1, 590); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz));
+                    if (!_lockPosition) { _lockPosition = true; var seiz = new ActionInfo(1, 195); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz));
                     } else  { _lockPosition = false; var seiz = new ActionInfo(1, 0);  _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); }
                 } else if ((stageID >= 301 && stageID <= 306) || (stageID >= 501 && stageID <= 506)) {
                     if (!_lockPosition) { _lockPosition = true; var seiz = new ActionInfo(1, 149); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz));
@@ -74,7 +74,7 @@ namespace Teleport
             uint stageID = (uint)Area.CurrentStage;
             if ((stageID >= 100 && stageID <= 109) || (stageID >= 200 && stageID <= 202) || (stageID >= 403 && stageID <= 417) || stageID == 504)  {
                 if (KeyBindings.IsPressed("TeleLock")) { 
-                    if (!_lockPosition) { _lockPosition = true; var seiz = new ActionInfo(1, 590); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); }
+                    if (!_lockPosition) { _lockPosition = true; var seiz = new ActionInfo(1, 195); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); }
                     else { _lockPosition = false; var seiz = new ActionInfo(1, 0); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); }}
             } else if ((stageID >= 301 && stageID <= 306) || (stageID >= 501 && stageID <= 506))  { 
                 if (KeyBindings.IsPressed("TeleLock")) {
