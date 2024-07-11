@@ -17,6 +17,8 @@ namespace Teleport
         public Monster? _selectedMonsterT = null;
         public void OnMonsterDestroy(Monster monster) { if (monster == _selectedMonsterT) { _selectedMonsterT = null; } }
         public void OnMonsterDeath(Monster monster) { if (monster == _selectedMonsterT) { _selectedMonsterT = null; } }
+        private uint _lastStage;
+        public void OnMonsterCreate(Monster monster) { uint stageID = (uint)Area.CurrentStage; _lastStage = stageID; }
         private Vector3 _currentPosition;
         private Vector3 _lastPosition;
         private Vector3 _mLastPosition;
@@ -70,6 +72,7 @@ namespace Teleport
                     } else {  _lockPosition = false; var seiz = new ActionInfo(1, 0); _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); player.ResumeAnimations(); } } } }
         public void OnLoad() { KeyBindings.AddKeybind("TeleLock", new Keybind<Key>(Key.T, [Key.LeftShift, Key.LeftAlt])); }
         public unsafe void OnUpdate(float deltaTime)  {
+            if ((uint)Area.CurrentStage != _lastStage) { _selectedMonsterT = null; }
             var player = Player.MainPlayer; if (player is null) return;
             var aC = player?.ActionController; if (aC == null) return;
             uint stageID = (uint)Area.CurrentStage; if (player == null) return;
