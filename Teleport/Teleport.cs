@@ -39,7 +39,7 @@ namespace Teleport
             if (player == null) return;
             ImGui.InputFloat("Velocity", ref _movementAmount, 0.0f, 300.0f);
             _movementAmount = Clamp(_movementAmount, _minMovementAmount, _maxMovementAmount);
-            var monsters = Monster.GetAllMonsters().TakeLast(5).ToArray();
+            var monsters = Monster.GetAllMonsters().TakeLast(20).ToArray();
             if (monsters == null) return;
             if (ImGui.BeginCombo("Select", $"{_selectedMonsterT}"))  {
                 foreach (var monster in monsters) {
