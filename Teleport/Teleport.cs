@@ -19,6 +19,12 @@ namespace Teleport
         public void OnMonsterDeath(Monster monster) { if (monster == _selectedMonsterT) { _selectedMonsterT = null; } }
         private uint _lastStage;
         public void OnMonsterCreate(Monster monster) { uint stageID = (uint)Area.CurrentStage; _lastStage = stageID; }
+        public void OnQuestLeave(int questId) { _selectedMonsterT = null; }
+        public void OnQuestComplete(int questId) { _selectedMonsterT = null; } 
+        public void OnQuestFail(int questId) { _selectedMonsterT = null; }
+        public void OnQuestReturn(int questId) { _selectedMonsterT = null; }
+        public void OnQuestAbandon(int questId) { _selectedMonsterT = null; }
+        public void OnQuestEnter(int questId) { _selectedMonsterT = null; }
         private Vector3 _currentPosition;
         private Vector3 _lastPosition;
         private Vector3 _mLastPosition;
