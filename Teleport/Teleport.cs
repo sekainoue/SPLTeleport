@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+﻿﻿using ImGuiNET;
 using SharpPluginLoader.Core.Entities;
 using SharpPluginLoader.Core;
 using SharpPluginLoader.Core.IO;
@@ -18,7 +18,7 @@ namespace Teleport
         public void OnMonsterDestroy(Monster monster) { if (monster == _selectedMonsterT) { _selectedMonsterT = null; } }
         public void OnMonsterDeath(Monster monster) { if (monster == _selectedMonsterT) { _selectedMonsterT = null; } }
         private uint _lastStage;
-        public void OnMonsterCreate(Monster monster) { uint stageID = (uint)Area.CurrentStage; _lastStage = stageID; }
+        public void OnMonsterCreate(Monster monster) { _lastStage = (uint)Area.CurrentStage; }
         public void OnQuestLeave(int questId) { _selectedMonsterT = null; }
         public void OnQuestComplete(int questId) { _selectedMonsterT = null; } 
         public void OnQuestFail(int questId) { _selectedMonsterT = null; }
