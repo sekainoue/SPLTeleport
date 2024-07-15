@@ -19,34 +19,40 @@ namespace Teleport
         { 
             _selectedMonsterT = null; 
             _frameCountdown = _framesForMessage;
-            _statusMessage = "Reset all targets.";
+            _statusMessage = "All targets reset.";
         }
         public void OnMonsterDestroy(Monster monster)
         {
             _frameCountdown = _framesForMessage;
-            _statusMessage = "Reset target.";
+            _statusMessage = $"{monster} destroyed.";
         }
 
         public void LockCoordinates(Monster monster)
         {
             LockedCoordinates[monster] = monster.Position;
+            _frameCountdown = _framesForMessage;
+            _statusMessage = $"Locked {monster} current coordinates.";
         }
 
         public void LockCoordinates(Monster monster, Vector3 coords)
         {
             LockedCoordinates[monster] = coords;
+            _frameCountdown = _framesForMessage;
+            _statusMessage = $"Locked {monster} new coordinates.";
         }
 
         public void UnlockCoordinates(Monster monster)
         {
             LockedCoordinates.Remove(monster, out _);
+            _frameCountdown = _framesForMessage;
+            _statusMessage = $"Unlocked {monster} coordinates.";
         }
         public void OnMonsterDeath(Monster monster)
         {
 
             LockedCoordinates.Remove(monster, out _);
             _frameCountdown = _framesForMessage;
-            _statusMessage = "Reset target.";
+            _statusMessage = $"Reset {monster}.";
         }
 
         private uint _lastStage = 0;
@@ -113,6 +119,12 @@ namespace Teleport
                 } ImGui.EndCombo();
             }
 
+            if (_frameCountdown > 0)
+            {
+                ImGui.Text(_statusMessage);
+                _frameCountdown--;
+            }
+
             if (ImGui.Button("Reset All"))
             {
                 ResetState();
@@ -134,6 +146,10 @@ namespace Teleport
                 if (!_mLockPosition)
                 {
                     UnlockCoordinates(_selectedMonsterT);
+                }
+                else
+                {
+                    LockCoordinates(_selectedMonsterT);
                 }
             }
 
@@ -197,11 +213,6 @@ namespace Teleport
 
             ImGui.Text($"{player.Position}");
 
-            if (_frameCountdown > 0) 
-            {
-                ImGui.Text(_statusMessage);
-                _frameCountdown--;
-            }
         }
 
         public void OnLoad() { KeyBindings.AddKeybind("TeleLock", new Keybind<Key>(Key.T, [Key.LeftShift, Key.LeftAlt])); }
