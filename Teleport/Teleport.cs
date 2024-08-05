@@ -11,7 +11,7 @@ namespace Teleport
 {
     public class Teleport : IPlugin
     {
-        public string Name => "NoClip -> LSHIFT LALT T";  public string Author => "seka";
+        public string Name => "-noclip";  public string Author => "seka";
         public Monster? _selectedMonsterT = null;
         public List<Monster> Monsters { get; set; } = new List<Monster>();
         public Dictionary<Monster, Vector3> LockedCoordinates { get; } = new Dictionary<Monster, Vector3>();
@@ -58,7 +58,6 @@ namespace Teleport
         private uint _lastStage = 0;
         public void OnMonsterCreate(Monster monster) 
         { 
-            _lastStage = (uint)Area.CurrentStage; 
             var presentMonsters = Monster.GetAllMonsters().TakeLast(8).ToArray();
             Monsters.Clear();
             Monsters.AddRange(presentMonsters);
@@ -101,35 +100,49 @@ namespace Teleport
             var player = Player.MainPlayer;
             if (player == null) 
                 return;
-            
-            ImGui.InputFloat("Velocity", ref _movementAmount, 0.0f, 300.0f);
-           
-            _movementAmount = Clamp(_movementAmount, _minMovementAmount, _maxMovementAmount);
-           
-            var monsters = Monster.GetAllMonsters().TakeLast(8).ToArray();
-            if (monsters == null) 
-                return;
-            if (ImGui.BeginCombo("Select", $"{_selectedMonsterT}"))  {
-                foreach (var monster in monsters) {
-                    if (ImGui.Selectable($"{monster}", _selectedMonsterT == monster))
-                    {
-                        _selectedMonsterT = monster;
-                        LockCoordinates(monster);
-                    }
-                } ImGui.EndCombo();
-            }
 
             if (_frameCountdown > 0)
             {
                 ImGui.Text(_statusMessage);
                 _frameCountdown--;
             }
+            else { ImGui.Text("Keys: Lshift Lalt T ←↑↓→ PgUp/PgDn"); }
+
+            ImGui.PushItemWidth(100.0f);
+            ImGui.InputFloat("Speed", ref _movementAmount, 0.0f, 300.0f);
+            ImGui.PopItemWidth();
+
+            _movementAmount = Clamp(_movementAmount, _minMovementAmount, _maxMovementAmount);
+
+            var monsters = Monster.GetAllMonsters().TakeLast(8).ToArray();
+            if (monsters == null) 
+                return;
+
+            ImGui.SameLine();
+            if (ImGui.Button("Unset"))
+            {
+                _selectedMonsterT = null;
+            }
+
+            ImGui.SameLine();
+            ImGui.PushItemWidth(250.0f);
+            if (ImGui.BeginCombo("Select", $"{_selectedMonsterT}"))  {
+                foreach (var monster in monsters) {
+                    if (ImGui.Selectable($"{monster}", _selectedMonsterT == monster))
+                    {
+                        _selectedMonsterT = monster;
+                        LockCoordinates(monster);
+                        _lastStage = (uint)Area.CurrentStage;
+                    }
+                } ImGui.EndCombo();
+            }
+            ImGui.PopItemWidth();
 
             if (ImGui.Button("Reset All"))
             {
                 ResetState();
             }
-
+            ImGui.SameLine();
             if (ImGui.Button("Mon-to-You")) {
                 if (_selectedMonsterT == null || player == null) 
                     return;
@@ -137,7 +150,8 @@ namespace Teleport
                 LockCoordinates(_selectedMonsterT, player.Position);
                 _mLockPosition = true;
             }
-            if (ImGui.Button("Lock/Unlock")) 
+            ImGui.SameLine();
+            if (ImGui.Button("Lock Mon")) 
             { 
                 if (_selectedMonsterT == null || player == null) 
                     return;
@@ -152,15 +166,16 @@ namespace Teleport
                     LockCoordinates(_selectedMonsterT);
                 }
             }
-
+            ImGui.SameLine();
             if (ImGui.Button("You-to-Mon")) {
                 if (_selectedMonsterT == null || player == null) 
                     return; 
                 player.Teleport(_selectedMonsterT.Position);
                 _lastPosition = player.Position;
+                _selectedMonsterT = null;
             }
 
-            ImGui.InputFloat3("←↑↓→/PgUp/PgDn", ref _inputPosition);
+            ImGui.InputFloat3("", ref _inputPosition);
 
             _inputPosition.X = Clamp(_inputPosition.X, _minInputPos, _maxInputPos);
             _inputPosition.Y = Clamp(_inputPosition.Y, _minInputPos, _maxInputPos);
@@ -173,39 +188,21 @@ namespace Teleport
                 return;
 
             uint stageID = (uint)Area.CurrentStage;
-
-            if (ImGui.Button("ToCoord")) 
+            ImGui.SameLine();
+            if (ImGui.Button("You-To-Coord")) 
             {
                 if ((stageID >= 100 && stageID <= 109) || (stageID >= 200 && stageID <= 202) || (stageID >= 403 && stageID <= 417) || stageID == 504)   
                 {
-                    _cMode = true; 
-                    if (!_lockPosition) 
-                    { 
-                        _lockPosition = true; 
-                        player.PauseAnimations(); 
-                    } else { 
-                        _lockPosition = false; 
-                        var seiz = new ActionInfo(1, 0); 
-                        _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); 
-                        player.ResumeAnimations(); 
-                    }
+                    _cMode = true;
+                    _lockPosition = true;
+                    var seiz = new ActionInfo(1, 0);
+                    _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz));
                 } else if ((stageID >= 301 && stageID <= 306) || (stageID >= 501 && stageID <= 506)) 
                 { 
                     _cMode = false;
-                    if (!_lockPosition)  
-                    { 
-                        _lockPosition = true; 
-                        var seiz = new ActionInfo(1, 149); 
-                        _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); 
-                        player.PauseAnimations(); 
-                    }
-                    else 
-                    { 
-                        _lockPosition = false; 
-                        var seiz = new ActionInfo(1, 0); 
-                        _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); 
-                        player.ResumeAnimations(); 
-                    } 
+                    _lockPosition = true;
+                    var seiz = new ActionInfo(1, 149);
+                    _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz));
                 } 
                 player.Teleport(_inputPosition);
                 _lastPosition = player.Position; 
@@ -240,12 +237,12 @@ namespace Teleport
                     if (!_lockPosition) 
                     { 
                         _lockPosition = true; 
-                        player.PauseAnimations();
+                        //player.PauseAnimations();
                     } else { 
                         _lockPosition = false; 
                         var seiz = new ActionInfo(1, 0); 
                         _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz));
-                        player.ResumeAnimations();
+                        //player.ResumeAnimations();
                     }
                 }
             } else if ((stageID >= 301 && stageID <= 306) || (stageID >= 501 && stageID <= 506))  
@@ -258,12 +255,12 @@ namespace Teleport
                         _lockPosition = true; 
                         var seiz = new ActionInfo(1, 149); 
                         _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); 
-                        player.PauseAnimations();
+                        //player.PauseAnimations();
                     } else { 
                         _lockPosition = false; 
                         var seiz = new ActionInfo(1, 0); 
                         _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); 
-                        player.ResumeAnimations();
+                        //player.ResumeAnimations();
                     }
                 }
             }
