@@ -82,7 +82,7 @@ namespace Teleport
         private string _statusMessage = "";
         private Vector3 _currentPosition;
         private Vector3 _lastPosition;
-        public float _movementAmount = 1f;
+        public float _movementAmount = 10f;
         private float _minMovementAmount = -1000.0f;
         private float _maxMovementAmount = 1000.0f;
         private NativeFunction<nint, nint, bool> _seiz = new(0x140269c90); 
@@ -92,6 +92,9 @@ namespace Teleport
         private float _minInputPos = -5000000.000f;
         private float _maxInputPos = 5000000.000f;
         private bool _cMode = false;
+        private float _playerRotationY;
+        private float _minRotation = -1.8f;
+        private float _maxRotation = 1.8f;
         public static float Clamp(float value, float min, float max)  {
             if (value < min) return min;
             if (value > max) return max;
@@ -106,7 +109,7 @@ namespace Teleport
                 ImGui.Text(_statusMessage);
                 _frameCountdown--;
             }
-            else { ImGui.Text("Keys: Lshift Lalt T ←↑↓→ PgUp/PgDn"); }
+            else { ImGui.Text("Keys: Lshift Lalt T ←↑↓→ PgUp/PgDn QE"); }
 
             ImGui.PushItemWidth(100.0f);
             ImGui.InputFloat("Speed", ref _movementAmount, 0.0f, 300.0f);
@@ -208,9 +211,10 @@ namespace Teleport
                 _lastPosition = player.Position; 
             }
 
-            ImGui.Text($"{player.Position}");
+            ImGui.Text($"{player.Position} {player.Rotation.Y * 180}°");
 
         }
+
 
         public void OnLoad() { KeyBindings.AddKeybind("TeleLock", new Keybind<Key>(Key.T, [Key.LeftShift, Key.LeftAlt])); }
         public unsafe void OnUpdate(float deltaTime)  {
@@ -269,7 +273,14 @@ namespace Teleport
                 return;
             
             _currentPosition = player.Position;
+            _playerRotationY = player.Rotation.Y; // remember this is different from player.Rotation.Y = _playerRotationY; 
+            _playerRotationY = Clamp(_playerRotationY, _minRotation, _maxRotation);
+
+            Vector3 upVector = new Vector3(0f, 1f, 0f); //normalized manually as 0,1,0
+            var normalizedSide = Vector3.Normalize(Vector3.Cross(player.Forward, upVector));  // normalize the cross product
+            if (normalizedSide == Vector3.Zero) return;
             
+
             if (_lockPosition) {
                 if (_cMode) 
                 { 
@@ -277,12 +288,15 @@ namespace Teleport
                     _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz)); 
                 } 
                 player.Teleport(_lastPosition); 
-                if (Input.IsDown(Key.UpArrow)) { _currentPosition.Z -= _movementAmount; player.Teleport(_currentPosition); _lastPosition = _currentPosition; }
-                if (Input.IsDown(Key.DownArrow)) { _currentPosition.Z += _movementAmount; player.Teleport(_currentPosition); _lastPosition = _currentPosition; }
+
+                if (Input.IsDown(Key.Q)) { _playerRotationY += 0.02f; player.Rotation.Y = _playerRotationY;  }
+                if (Input.IsDown(Key.E)) { _playerRotationY -= 0.02f; player.Rotation.Y = _playerRotationY;  }
+                if (Input.IsDown(Key.UpArrow)) { _currentPosition += player.Forward * _movementAmount; player.Teleport(_currentPosition); _lastPosition = _currentPosition; }
+                if (Input.IsDown(Key.DownArrow)) { _currentPosition -= player.Forward * _movementAmount; player.Teleport(_currentPosition); _lastPosition = _currentPosition; }
                 if (Input.IsDown(Key.PageUp)) { _currentPosition.Y += _movementAmount; player.Teleport(_currentPosition); _lastPosition = _currentPosition; }
                 if (Input.IsDown(Key.PageDown)) {  _currentPosition.Y -= _movementAmount; player.Teleport(_currentPosition); _lastPosition = _currentPosition; }
-                if (Input.IsDown(Key.LeftArrow)) {  _currentPosition.X -= _movementAmount; player.Teleport(_currentPosition);  _lastPosition = _currentPosition; }
-                if (Input.IsDown(Key.RightArrow)) { _currentPosition.X += _movementAmount; player.Teleport(_currentPosition);  _lastPosition = _currentPosition; }
+                if (Input.IsDown(Key.LeftArrow)) { _currentPosition -= normalizedSide * _movementAmount; player.Teleport(_currentPosition);  _lastPosition = _currentPosition; }
+                if (Input.IsDown(Key.RightArrow)) { _currentPosition += normalizedSide * _movementAmount; player.Teleport(_currentPosition);  _lastPosition = _currentPosition; }
             } else {
                 _lastPosition = player.Position; 
             }

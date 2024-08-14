@@ -8,6 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Lite.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Lite.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="SharpPluginLoader.Core" Version="0.0.6" />
     <PackageReference Include="SharpPluginLoader.ImGui" Version="1.90.2.3" />
   </ItemGroup>
