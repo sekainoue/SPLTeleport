@@ -6,6 +6,7 @@ using System.Numerics;
 using SharpPluginLoader.Core.Actions;
 using SharpPluginLoader.Core.Memory;
 using System.Collections.Concurrent;
+using System;
 
 namespace Teleport
 {
@@ -88,7 +89,7 @@ namespace Teleport
         private NativeFunction<nint, nint, bool> _seiz = new(0x140269c90); 
         private bool _lockPosition = false;
         private bool _mLockPosition = false;
-        private Vector3 _inputPosition = new Vector3(0f, 0f, 0f);
+        private Vector3 _inputPosition = new Vector3(0f, 0f, 0f); // seliana hub wingdrake area
         private float _minInputPos = -5000000.000f;
         private float _maxInputPos = 5000000.000f;
         private bool _cMode = false;
@@ -211,12 +212,17 @@ namespace Teleport
                 _lastPosition = player.Position; 
             }
 
-            ImGui.Text($"{player.Position} {player.Rotation.Y * 180}°");
+            ImGui.Text($" {player.Position} ");
+            ImGui.Text($"(Shift Alt F to Wingdrake Post) Rotation: {player.Rotation.Y * 180}° ");
 
         }
 
 
-        public void OnLoad() { KeyBindings.AddKeybind("TeleLock", new Keybind<Key>(Key.T, [Key.LeftShift, Key.LeftAlt])); }
+        public void OnLoad() 
+        { 
+            KeyBindings.AddKeybind("TeleLock", new Keybind<Key>(Key.T, [Key.LeftShift, Key.LeftAlt]));
+            KeyBindings.AddKeybind("ToWingdrake", new Keybind<Key>(Key.V, [Key.LeftShift, Key.LeftAlt]));
+        }
         public unsafe void OnUpdate(float deltaTime)  {
             var player = Player.MainPlayer; 
             if (player is null) 
@@ -307,6 +313,11 @@ namespace Teleport
                 {
                     monster.Key.Teleport(monster.Value);
                 }
+            }
+
+            if (KeyBindings.IsPressed("ToWingdrake"))
+            {
+                player.Teleport(new Vector3(-4547.07f, 4418.92f, -9612.16f));
             }
         }
     }
