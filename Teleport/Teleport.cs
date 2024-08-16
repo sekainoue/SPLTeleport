@@ -212,8 +212,8 @@ namespace Teleport
                 _lastPosition = player.Position; 
             }
 
-            ImGui.Text($" {player.Position} ");
-            ImGui.Text($"(Shift Alt F to Wingdrake Post) Rotation: {player.Rotation.Y * 180}° ");
+            ImGui.Text($" {player.Position:F1} ");
+            ImGui.Text($"{player.Rotation.Y * 180:F1}° ToWingdrake ShiftAltV");
 
         }
 
@@ -274,6 +274,8 @@ namespace Teleport
                     }
                 }
             }
+
+
             
             if (player == null) 
                 return;
@@ -315,10 +317,16 @@ namespace Teleport
                 }
             }
 
-            if (KeyBindings.IsPressed("ToWingdrake"))
+            if (Area.CurrentStage == Stage.SelianaHub && KeyBindings.IsPressed("ToWingdrake"))
             {
                 player.Teleport(new Vector3(-4547.07f, 4418.92f, -9612.16f));
             }
+            else if (Quest.CurrentQuestId != -1 && KeyBindings.IsPressed("ToWingdrake"))
+            {
+                var flyToMon = new ActionInfo(1, 318);
+                _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref flyToMon));
+            }
+
         }
     }
 }
