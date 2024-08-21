@@ -1,6 +1,9 @@
 ﻿using ImGuiNET;
 using SharpPluginLoader.Core.Entities;
 using SharpPluginLoader.Core;
+using SharpPluginLoader.Core.IO;
+using SharpPluginLoader.Core.Actions;
+using SharpPluginLoader.Core.Memory;
 
 namespace FlyMeToTheMon
 {
@@ -24,6 +27,12 @@ namespace FlyMeToTheMon
         public void OnQuestReturn(int questId) => ResetState();
         public void OnQuestAbandon(int questId) => ResetState();
         public void OnQuestEnter(int questId) => ResetState();
+        private NativeFunction<nint, nint, bool> _fly = new(0x140269c90);
+
+        public void OnLoad()
+        {
+            KeyBindings.AddKeybind("ToWingdrake", new Keybind<Key>(Key.V, [Key.LeftShift, Key.LeftAlt]));
+        }
 
         public unsafe void OnImGuiRender()
         {
@@ -34,7 +43,7 @@ namespace FlyMeToTheMon
             var monsters = Monster.GetAllMonsters().TakeLast(5).ToArray();
             if (monsters == null)
                 return;
-            if (ImGui.BeginCombo("Select", $"{_selectedMonsterT}"))
+            if (ImGui.BeginCombo("Shift Alt V to Main", $"{_selectedMonsterT}"))
             {
                 foreach (var monster in monsters)
                 {
@@ -67,6 +76,15 @@ namespace FlyMeToTheMon
 
             uint stageID = (uint)Area.CurrentStage;
 
+            var aC = player?.ActionController;
+            if (aC == null)
+                return;
+
+            if (Quest.CurrentQuestId != -1 && KeyBindings.IsPressed("ToWingdrake"))
+            {
+                var flyToMon = new ActionInfo(1, 318);
+                _fly.Invoke(aC.Instance, MemoryUtil.AddressOf(ref flyToMon));
+            }
         }
     }
 }

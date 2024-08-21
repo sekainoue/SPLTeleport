@@ -297,8 +297,8 @@ namespace Teleport
                 } 
                 player.Teleport(_lastPosition); 
 
-                if (Input.IsDown(Key.Q)) { _playerRotationY += 0.02f; player.Rotation.Y = _playerRotationY;  }
-                if (Input.IsDown(Key.E)) { _playerRotationY -= 0.02f; player.Rotation.Y = _playerRotationY;  }
+                if (Input.IsDown(Key.Q)) { _playerRotationY -= 0.02f; player.Rotation.Y = _playerRotationY;  }
+                if (Input.IsDown(Key.E)) { _playerRotationY += 0.02f; player.Rotation.Y = _playerRotationY;  }
                 if (Input.IsDown(Key.UpArrow)) { _currentPosition += player.Forward * _movementAmount; player.Teleport(_currentPosition); _lastPosition = _currentPosition; }
                 if (Input.IsDown(Key.DownArrow)) { _currentPosition -= player.Forward * _movementAmount; player.Teleport(_currentPosition); _lastPosition = _currentPosition; }
                 if (Input.IsDown(Key.PageUp)) { _currentPosition.Y += _movementAmount; player.Teleport(_currentPosition); _lastPosition = _currentPosition; }
