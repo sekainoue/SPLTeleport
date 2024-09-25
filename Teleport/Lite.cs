@@ -80,7 +80,11 @@ namespace FlyMeToTheMon
             if (aC == null)
                 return;
 
-            if (Quest.CurrentQuestId != -1 && KeyBindings.IsPressed("ToWingdrake"))
+            if (Area.CurrentStage == Stage.SelianaHub && KeyBindings.IsPressed("ToWingdrake"))
+            {
+                player.Teleport(new Vector3(-4547.07f, 4418.92f, -9612.16f));
+            }
+            else if (Quest.CurrentQuestId != -1 && KeyBindings.IsPressed("ToWingdrake"))
             {
                 var flyToMon = new ActionInfo(1, 318);
                 _fly.Invoke(aC.Instance, MemoryUtil.AddressOf(ref flyToMon));

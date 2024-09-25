@@ -317,16 +317,26 @@ namespace Teleport
                 }
             }
 
-            if (Area.CurrentStage == Stage.SelianaHub && KeyBindings.IsPressed("ToWingdrake"))
+            if (KeyBindings.IsPressed("ToWingdrake"))
             {
-                player.Teleport(new Vector3(-4547.07f, 4418.92f, -9612.16f));
+                if (Area.CurrentStage == Stage.SelianaHub)
+                {
+                    player.Teleport(new Vector3(-4547.07f, 4418.92f, -9612.16f));
+                }
+                else if (Area.CurrentStage == Stage.Seliana)
+                {
+                    player.Teleport(new Vector3(-197.4f, 2924.8f, -2857.2f));
+                }
+                else if (Area.CurrentStage == Stage.Astera)
+                {
+                    player.Teleport(new Vector3(9674.2f, 5604.4f, -5534.9f));
+                }
+                else if (Quest.CurrentQuestId != -1)
+                {
+                    var flyToMon = new ActionInfo(1, 318);
+                    _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref flyToMon));
+                }
             }
-            else if (Quest.CurrentQuestId != -1 && KeyBindings.IsPressed("ToWingdrake"))
-            {
-                var flyToMon = new ActionInfo(1, 318);
-                _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref flyToMon));
-            }
-
         }
     }
 }
