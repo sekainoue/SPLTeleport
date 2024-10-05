@@ -17,13 +17,16 @@ namespace Teleport
         public List<Monster> Monsters { get; set; } = new List<Monster>();
         public Dictionary<Monster, Vector3> LockedCoordinates { get; } = new Dictionary<Monster, Vector3>();
         public void ResetState()
-        { 
+        {
+            Monsters.Clear();
+            LockedCoordinates.Clear();
             _selectedMonsterT = null; 
             _frameCountdown = _framesForMessage;
             _statusMessage = "All targets reset.";
         }
         public void OnMonsterDestroy(Monster monster)
         {
+            LockedCoordinates.Remove(monster, out _);
             _frameCountdown = _framesForMessage;
             _statusMessage = $"{monster} destroyed.";
         }
