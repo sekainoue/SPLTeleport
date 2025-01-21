@@ -16,6 +16,10 @@ namespace Teleport
         public Monster? _selectedMonsterT = null;
         public List<Monster> Monsters { get; set; } = new List<Monster>();
         public Dictionary<Monster, Vector3> LockedCoordinates { get; } = new Dictionary<Monster, Vector3>();
+
+        public Monster? _lastMonOne = null;
+        public Monster? _lastMonDos = null;
+        public Monster? _lastMonTre = null;
         public void ResetState()
         {
             Monsters.Clear();
@@ -23,6 +27,8 @@ namespace Teleport
             _selectedMonsterT = null; 
             _frameCountdown = _framesForMessage;
             _statusMessage = "All targets reset.";
+
+            _lastMonOne = null; _lastMonDos = null; _lastMonTre = null;
         }
         public void OnMonsterDestroy(Monster monster)
         {
@@ -73,6 +79,14 @@ namespace Teleport
                     LockedCoordinates[monsterToList] = monsterToList.Position;
                 }
             }
+
+            var monsters = Monster.GetAllMonsters().TakeLast(5).ToArray();
+            int count = monsters.Length;
+            if (monsters == null)
+                return;
+            _lastMonOne = count >= 1 ? monsters[count - 1] : null;
+            _lastMonDos = count >= 2 ? monsters[count - 2] : null;
+            _lastMonTre = count >= 3 ? monsters[count - 3] : null;
         }
         public void OnQuestLeave(int questId) => ResetState();
         public void OnQuestComplete(int questId) => ResetState();
@@ -89,7 +103,7 @@ namespace Teleport
         public float _movementAmount = 10f;
         private float _minMovementAmount = -1000.0f;
         private float _maxMovementAmount = 1000.0f;
-        private NativeFunction<nint, nint, bool> _seiz = new(0x140269c90); 
+        private NativeFunction<nint, nint, bool> _seiz = new(0x140269ce0); 
         private bool _lockPosition = false;
         private bool _mLockPosition = false;
         private Vector3 _inputPosition = new Vector3(0f, 0f, 0f); // seliana hub wingdrake area
@@ -224,6 +238,9 @@ namespace Teleport
         public void OnLoad() 
         { 
             KeyBindings.AddKeybind("TeleLock", new Keybind<Key>(Key.T, [Key.LeftShift, Key.LeftAlt]));
+            KeyBindings.AddKeybind("JumpOne", new Keybind<Key>(Key.D1, [Key.LeftShift, Key.LeftAlt]));
+            KeyBindings.AddKeybind("JumpDos", new Keybind<Key>(Key.D2, [Key.LeftShift, Key.LeftAlt]));
+            KeyBindings.AddKeybind("JumpTre", new Keybind<Key>(Key.D3, [Key.LeftShift, Key.LeftAlt]));
             KeyBindings.AddKeybind("ToWingdrake", new Keybind<Key>(Key.V, [Key.LeftShift, Key.LeftAlt]));
         }
         public unsafe void OnUpdate(float deltaTime)  {
@@ -320,21 +337,103 @@ namespace Teleport
                 }
             }
 
-            if (KeyBindings.IsPressed("ToWingdrake"))
+            if (Area.CurrentStage == Stage.SelianaRoom)
             {
-                if (Area.CurrentStage == Stage.SelianaHub)
+                if (KeyBindings.IsPressed("JumpOne"))
+                {
+                    player.Teleport(new Vector3(-634.9f, 3353.4f, 1109.4f));
+                }
+                else if (KeyBindings.IsPressed("JumpDos"))
+                {
+                    player.Teleport(new Vector3(841.2f, 2853.4f, 562f));
+                }
+                else if (KeyBindings.IsPressed("JumpTre"))
+                {
+                    player.Teleport(new Vector3(-1545.8f, 2808.3f, -443.3f));
+                }
+                else if (KeyBindings.IsPressed("ToWingdrake"))
+                {
+                    player.Teleport(new Vector3(1559.7f, 5663.3f, -1136.9f));
+                }
+            }
+            else if(Area.CurrentStage == Stage.TrainingCamp)
+            {
+                if (KeyBindings.IsPressed("JumpOne"))
+                {
+                    player.Teleport(new Vector3(-1993.2f, 6f, 334.8f));
+                }
+                else if (KeyBindings.IsPressed("JumpDos"))
+                {
+                    player.Teleport(new Vector3(265.5f, -56f, -312.3f));
+                }
+                else if (KeyBindings.IsPressed("JumpTre"))
+                {
+                    player.Teleport(new Vector3(-3032.9f, -19.7f, -246.3f));
+                }
+            }
+            else if (Area.CurrentStage == Stage.SelianaHub)
+            {
+                if (KeyBindings.IsPressed("JumpOne"))
+                {
+                    player.Teleport(new Vector3(-5827.7f, 4593.2f, -6681.8f));
+                }
+                else if (KeyBindings.IsPressed("JumpDos"))
+                {
+                    player.Teleport(new Vector3(-3050.8f, 3472.0f, -1153.4f));
+                }
+                else if (KeyBindings.IsPressed("JumpTre"))
                 {
                     player.Teleport(new Vector3(-4547.07f, 4418.92f, -9612.16f));
                 }
-                else if (Area.CurrentStage == Stage.Seliana)
+            }
+            else if (Area.CurrentStage == Stage.Seliana)
+            {
+                if (KeyBindings.IsPressed("JumpOne"))
                 {
                     player.Teleport(new Vector3(-197.4f, 2924.8f, -2857.2f));
                 }
-                else if (Area.CurrentStage == Stage.Astera)
+                else if (KeyBindings.IsPressed("JumpDos"))
+                {
+                    player.Teleport(new Vector3(-3050.8f, 3472.0f, -1153.4f));
+                }
+                else if (KeyBindings.IsPressed("JumpTre"))
+                {
+                    player.Teleport(new Vector3(-2822.3f, 3935.7f, -3649f));
+                }
+            }
+            else if (Area.CurrentStage == Stage.Astera)
+            {
+                if (KeyBindings.IsPressed("JumpOne"))
+                {
+                    player.Teleport(new Vector3(5978.9f, 1781.9f, -2486.9f));
+                }
+                else if (KeyBindings.IsPressed("JumpDos"))
+                {
+                    player.Teleport(new Vector3(13443.7f, 4710.4f, -166.2f));
+                }
+                else if (KeyBindings.IsPressed("JumpTre"))
                 {
                     player.Teleport(new Vector3(9674.2f, 5604.4f, -5534.9f));
                 }
-                else if (Quest.CurrentQuestId != -1)
+            }
+            else if (_lastMonOne != null)
+            {
+                if (KeyBindings.IsPressed("JumpOne"))
+                {
+                    if (_lastMonOne is null) return;
+                    player.Teleport(_lastMonOne.Position);
+                }
+                else if (KeyBindings.IsPressed("JumpDos"))
+                {
+                    if (_lastMonDos is null) return;
+                    player.Teleport(_lastMonDos.Position);
+                }
+                else if (KeyBindings.IsPressed("JumpTre"))
+                {
+                    if (_lastMonTre is null) return;
+                    player.Teleport(_lastMonTre.Position);
+                }
+                else if (KeyBindings.IsPressed("ToWingdrake"))
                 {
                     var flyToMon = new ActionInfo(1, 318);
                     _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref flyToMon));
