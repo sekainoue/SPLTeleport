@@ -67,7 +67,9 @@ namespace Teleport
 
         private uint _lastStage = 0;
         public void OnMonsterCreate(Monster monster) 
-        { 
+        {
+            _lastStage = (uint)Area.CurrentStage; //uncertain if this is necessary or if it has any potential conflict
+
             var presentMonsters = Monster.GetAllMonsters().TakeLast(8).ToArray();
             Monsters.Clear();
             Monsters.AddRange(presentMonsters);
@@ -93,7 +95,28 @@ namespace Teleport
         public void OnQuestFail(int questId) => ResetState();
         public void OnQuestReturn(int questId) => ResetState();
         public void OnQuestAbandon(int questId) => ResetState();
-        public void OnQuestEnter(int questId) => ResetState();
+        public void OnQuestEnter(int questId) 
+        {
+            Monsters.Clear();
+            LockedCoordinates.Clear();
+            _selectedMonsterT = null;
+            _frameCountdown = _framesForMessage;
+            _statusMessage = "All targets reset.";
+
+            //do not nullify _lastMonXXX
+            
+            var player = Player.MainPlayer;
+            if (player == null)
+                return;
+
+            var monsters = Monster.GetAllMonsters().TakeLast(5).ToArray();
+            int count = monsters.Length;
+            if (monsters == null)
+                return;
+            _lastMonOne = count >= 1 ? monsters[count - 1] : null;
+            _lastMonDos = count >= 2 ? monsters[count - 2] : null;
+            _lastMonTre = count >= 3 ? monsters[count - 3] : null;
+        }
 
         private int _frameCountdown = 0;
         private const int _framesForMessage = 180;
@@ -242,6 +265,7 @@ namespace Teleport
             KeyBindings.AddKeybind("JumpDos", new Keybind<Key>(Key.D2, [Key.LeftShift, Key.LeftAlt]));
             KeyBindings.AddKeybind("JumpTre", new Keybind<Key>(Key.D3, [Key.LeftShift, Key.LeftAlt]));
             KeyBindings.AddKeybind("ToWingdrake", new Keybind<Key>(Key.V, [Key.LeftShift, Key.LeftAlt]));
+            KeyBindings.AddKeybind("FreeMe", new Keybind<Key>(Key.X, [Key.LeftShift, Key.LeftAlt]));
         }
         public unsafe void OnUpdate(float deltaTime)  {
             var player = Player.MainPlayer; 
@@ -437,6 +461,11 @@ namespace Teleport
                 {
                     var flyToMon = new ActionInfo(1, 318);
                     _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref flyToMon));
+                }
+                else if (KeyBindings.IsPressed("FreeMe"))
+                {
+                    var freeMe = new ActionInfo(1, 0);
+                    _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref freeMe));
                 }
             }
         }
