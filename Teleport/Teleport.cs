@@ -130,6 +130,10 @@ namespace Teleport
         private bool _lockPosition = false;
         private bool _mLockPosition = false;
         private Vector3 _inputPosition = new Vector3(0f, 0f, 0f); // seliana hub wingdrake area
+        private Vector3 _pointA = new Vector3(0f, 0f, 0f);
+        private Vector3 _pointB = new Vector3(0f, 0f, 0f);
+        private Vector3 _pointC = new Vector3(0f, 0f, 0f);
+        private Vector3 _distD = new Vector3(0f, 0f, 0f);
         private float _minInputPos = -5000000.000f;
         private float _maxInputPos = 5000000.000f;
         private bool _cMode = false;
@@ -219,7 +223,7 @@ namespace Teleport
                 _selectedMonsterT = null;
             }
 
-            ImGui.InputFloat3("", ref _inputPosition);
+            ImGui.InputFloat3("Target", ref _inputPosition);
 
             _inputPosition.X = Clamp(_inputPosition.X, _minInputPos, _maxInputPos);
             _inputPosition.Y = Clamp(_inputPosition.Y, _minInputPos, _maxInputPos);
@@ -231,11 +235,22 @@ namespace Teleport
             if (player == null)
                 return;
 
-            uint stageID = (uint)Area.CurrentStage;
+            uint stageID = (uint)Area.CurrentStage; 
             ImGui.SameLine();
-            if (ImGui.Button("You-To-Coord")) 
+            if (ImGui.Button("SetHere##player"))
             {
-                if ((stageID >= 100 && stageID <= 109) || (stageID >= 200 && stageID <= 202) || (stageID >= 403 && stageID <= 417) || stageID == 504)   
+                _inputPosition = player.Position;
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("GoTo##target"))
+            {
+                player.Teleport(_inputPosition);
+                _lastPosition = player.Position;
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("SitTo#target")) 
+            {
+                if ((stageID >= 100 && stageID <= 109) || (stageID >= 200 && stageID <= 203) || (stageID >= 403 && stageID <= 417) || stageID == 504)   
                 {
                     _cMode = true;
                     _lockPosition = true;
@@ -251,10 +266,111 @@ namespace Teleport
                 player.Teleport(_inputPosition);
                 _lastPosition = player.Position; 
             }
-
-            ImGui.Text($" {player.Position:F1} ");
+            
+            ImGui.Text($" {player.Position:F1} "); 
+            ImGui.SameLine();
             ImGui.Text($"{player.Rotation.Y * 180:F1}° ToWingdrake ShiftAltV");
+            
+            ImGui.InputFloat3("Point A", ref _pointA);
+            ImGui.SameLine();
+            if (ImGui.Button("Here=A"))
+            {
+                _pointA = player.Position;
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("GoTo##A"))
+            {
+                player.Teleport(_pointA);
+                _lastPosition = player.Position;
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("SitTo#A"))
+            {
+                if ((stageID >= 100 && stageID <= 109) || (stageID >= 200 && stageID <= 203) || (stageID >= 403 && stageID <= 417) || stageID == 504)
+                {
+                    _cMode = true;
+                    _lockPosition = true;
+                    var seiz = new ActionInfo(1, 0);
+                    _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz));
+                }
+                else if ((stageID >= 301 && stageID <= 306) || (stageID >= 501 && stageID <= 506))
+                {
+                    _cMode = false;
+                    _lockPosition = true;
+                    var seiz = new ActionInfo(1, 149);
+                    _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz));
+                }
+                player.Teleport(_pointA);
+                _lastPosition = player.Position;
+            }
 
+            ImGui.InputFloat3("Point B", ref _pointB);
+            ImGui.SameLine();
+            if (ImGui.Button("Here=B"))
+            {
+                _pointB = player.Position;
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("GoTo##B"))
+            {
+                player.Teleport(_pointB);
+                _lastPosition = player.Position;
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("SitTo#B"))
+            {
+                if ((stageID >= 100 && stageID <= 109) || (stageID >= 200 && stageID <= 203) || (stageID >= 403 && stageID <= 417) || stageID == 504)
+                {
+                    _cMode = true;
+                    _lockPosition = true;
+                    var seiz = new ActionInfo(1, 0);
+                    _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz));
+                }
+                else if ((stageID >= 301 && stageID <= 306) || (stageID >= 501 && stageID <= 506))
+                {
+                    _cMode = false;
+                    _lockPosition = true;
+                    var seiz = new ActionInfo(1, 149);
+                    _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz));
+                }
+                player.Teleport(_pointB);
+                _lastPosition = player.Position;
+            }
+
+            ImGui.InputFloat3("Midpoint", ref _pointC);
+            ImGui.SameLine();
+            if (ImGui.Button("FindMidpoint"))
+            {
+                _distD = _pointB - _pointA; 
+                _distD /= 2;
+                _pointC = _pointA + _distD;
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("GoTo##C"))
+            {
+                player.Teleport(_pointC);
+                _lastPosition = player.Position;
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("SitTo#C"))
+            {
+                if ((stageID >= 100 && stageID <= 109) || (stageID >= 200 && stageID <= 203) || (stageID >= 403 && stageID <= 417) || stageID == 504)
+                {
+                    _cMode = true;
+                    _lockPosition = true;
+                    var seiz = new ActionInfo(1, 0);
+                    _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz));
+                }
+                else if ((stageID >= 301 && stageID <= 306) || (stageID >= 501 && stageID <= 506))
+                {
+                    _cMode = false;
+                    _lockPosition = true;
+                    var seiz = new ActionInfo(1, 149);
+                    _seiz.Invoke(aC.Instance, MemoryUtil.AddressOf(ref seiz));
+                }
+                player.Teleport(_pointC);
+                _lastPosition = player.Position;
+            }
         }
 
 
@@ -283,7 +399,7 @@ namespace Teleport
             uint stageID = (uint)Area.CurrentStage; 
             if (player == null) 
                 return;
-            if ((stageID >= 100 && stageID <= 109) || (stageID >= 200 && stageID <= 202) || (stageID >= 403 && stageID <= 417) || stageID == 504)  
+            if ((stageID >= 100 && stageID <= 109) || (stageID >= 200 && stageID <= 203) || (stageID >= 403 && stageID <= 417) || stageID == 504)  
             { 
                 _cMode = true;
                 if (KeyBindings.IsPressed("TeleLock")) 
